@@ -32,9 +32,14 @@ d3.behavior.zoom = function() {
   // Lazily determine the DOM’s support for Wheel events.
   // https://developer.mozilla.org/en-US/docs/Mozilla_event_reference/wheel
   if (!d3_behavior_zoomWheel) {
-    d3_behavior_zoomWheel = "onwheel" in d3_document ? (d3_behavior_zoomDelta = function() { return -d3.event.deltaY * (d3.event.deltaMode ? 120 : 1); }, "wheel")
-        : "onmousewheel" in d3_document ? (d3_behavior_zoomDelta = function() { return d3.event.wheelDelta; }, "mousewheel")
-        : (d3_behavior_zoomDelta = function() { return -d3.event.detail; }, "MozMousePixelScroll");
+    if ("onwheel" in d3_document) {
+      d3_behavior_zoomWheel = (d3_behavior_zoomDelta = function() { return -d3.event.deltaY * (d3.event.deltaMode ? 120 : 1); }, "wheel");
+    } else if ("onmousewheel" in d3_document) {
+      var scale = navigator.userAgent.indexOf("JavaFX") >= 0 ? 0.0625 : 1.0000;
+      d3_behavior_zoomWheel = (d3_behavior_zoomDelta = function() { return d3.event.wheelDelta * scale; }, "mousewheel");
+    } else {
+      d3_behavior_zoomWheel = (d3_behavior_zoomDelta = function() { return -d3.event.detail; }, "MozMousePixelScroll");
+    }
   }
 
   function zoom(g) {

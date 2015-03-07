@@ -1305,13 +1305,22 @@
       k: 1
     }, translate0, center0, center, size = [ 960, 500 ], scaleExtent = d3_behavior_zoomInfinity, duration = 250, zooming = 0, mousedown = "mousedown.zoom", mousemove = "mousemove.zoom", mouseup = "mouseup.zoom", mousewheelTimer, touchstart = "touchstart.zoom", touchtime, event = d3_eventDispatch(zoom, "zoomstart", "zoom", "zoomend"), x0, x1, y0, y1;
     if (!d3_behavior_zoomWheel) {
-      d3_behavior_zoomWheel = "onwheel" in d3_document ? (d3_behavior_zoomDelta = function() {
-        return -d3.event.deltaY * (d3.event.deltaMode ? 120 : 1);
-      }, "wheel") : "onmousewheel" in d3_document ? (d3_behavior_zoomDelta = function() {
-        return d3.event.wheelDelta;
-      }, "mousewheel") : (d3_behavior_zoomDelta = function() {
-        return -d3.event.detail;
-      }, "MozMousePixelScroll");
+      if ("onwheel" in d3_document) {
+        d3_behavior_zoomWheel = (d3_behavior_zoomDelta = function() {
+          return -d3.event.deltaY * (d3.event.deltaMode ? 120 : 1);
+        }, "wheel");
+      } else if ("onmousewheel" in d3_document) {
+        var scale = navigator.userAgent.indexOf("JavaFX") >= 0 ? .0625 : 1;
+        d3_behavior_zoomWheel = (d3_behavior_zoomDelta = function() {
+          return d3.event.wheelDelta * scale;
+        }, "mousewheel");
+      } else {
+        d3_behavior_zoomWheel = (d3_behavior_zoomDelta = function() {
+          return -d3.event.detail;
+        }, "MozMousePixelScroll");
+      }
+      console.log("onwheel" in d3_document);
+      console.log("onmousewheel" in d3_document);
     }
     function zoom(g) {
       g.on(mousedown, mousedowned).on(d3_behavior_zoomWheel + ".zoom", mousewheeled).on("dblclick.zoom", dblclicked).on(touchstart, touchstarted);
